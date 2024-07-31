@@ -37,53 +37,51 @@
 </main>
 
 <script>
+    const newElement = (tag, classes, text) => {
+        const ele = document.createElement(tag);
+        ele.classList.add(...classes);
+        ele.textContent = text;
+        return ele;
+    };
     const memoFeed = async () => {
         const url = 'https://graph.cash/graphql';
+        const query = `
+            query {
+                posts_newest {
+                    lock {
+                        address
+                    }
+                    tx {
+                        hash
+                        seen
+                    }
+                    text
+                }
+            }
+        `;
         const response = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                query: `
-                    query {
-                        posts_newest {
-                            lock {
-                                address
-                            }
-                            tx {
-                                hash
-                                seen
-                            }
-                            text
-                        }
-                    }
-                `
-            })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({query: query})
         });
         const posts = await response.json();
         const feed = document.getElementById('memo-feed');
-        let i = 0;
-        posts.data.posts_newest.forEach(post => {
-            if (i++ >= 5) {
-                return
-            }
-            const postElement = document.createElement('div');
-            const seen = new Date(post.tx.seen)
-            postElement.innerHTML = `
-                <div class="list-group">
-                    <a class="list-group-item list-group-item-action"
-                    href="https://memo.cash/post/${post.tx.hash}" target="memo">
-                        <p class="card-text text-break">
-                        ${post.text}<br/>
-                        </p>
-                        <p class="card-text text-break card-text-sm">
-                        ${post.lock.address} @ ${seen.toLocaleDateString('en-us', {hour: "numeric", minute: "numeric"})}
-                        </p>
-                    </a>
-                </div>
-            `;
-            feed.appendChild(postElement);
+        posts.data.posts_newest.splice(0, 5).forEach(post => {
+            const secondaryText = `${post.lock.address} @
+            ${new Date(post.tx.seen).toLocaleDateString('en-us', {hour: "numeric", minute: "numeric"})}`;
+
+            const divListGroup = newElement("div", ["list-group"]);
+            const aListGroupItem = newElement("a", ["list-group-item", "list-group-item-action"]);
+            const pSecondaryText = newElement("p", ["card-text", "text-break", "card-text-sm"], secondaryText);
+            const pMainText = newElement("p", ["card-text", "text-break"], post.text);
+
+            aListGroupItem.href = `https://memo.cash/post/${post.tx.hash}`;
+            aListGroupItem.target = "memo";
+
+            divListGroup.append(aListGroupItem)
+            aListGroupItem.append(pMainText);
+            aListGroupItem.append(pSecondaryText);
+            feed.appendChild(divListGroup);
         });
     };
     memoFeed();
