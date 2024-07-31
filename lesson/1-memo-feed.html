@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bitcoin Learn Example: Memo Feed</title>
+    <title>Bitcoin Learn - Lesson 1: Memo Feed</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="../learn.css"/>
@@ -25,8 +25,8 @@
 <main>
     <div class="px-5">
         <div class="col-lg-6 mx-auto">
-            <h1>Example: Memo Feed</h1>
-            <p class="lead mb-4">This example gets a feed of the newest Memo posts.</p>
+            <h1>Lesson 1: Memo Feed</h1>
+            <p class="lead mb-4">This lesson gets a feed of the newest Memo posts.</p>
         </div>
     </div>
     <div class="px-5">
@@ -63,9 +63,13 @@
         });
         const posts = await response.json();
         const feed = document.getElementById('memo-feed');
+        let i = 0;
         posts.data.posts_newest.forEach(post => {
+            if (i++ >= 5) {
+                return
+            }
             const postElement = document.createElement('div');
-            let seen = new Date(post.tx.seen)
+            const seen = new Date(post.tx.seen)
             postElement.innerHTML = `
                 <div class="list-group">
                     <a class="list-group-item list-group-item-action"
